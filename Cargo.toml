@@ -8,8 +8,8 @@ repository = "https://github.com/CalebCouch/orangeme.git"
 authors = ["Caleb Couch <caleb@orange.me>", "Ella Couch <ella@orange.me>"]
 
 [dependencies]
-pelican_ui = {path = "../pelican_ui" }
-pelican_ui_std = { path = "../pelican_ui_std" }
+pelican_ui = "1.1.7"
+pelican_ui_std = "0.2.8"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1.43.0", features = ["rt-multi-thread", "sync", "time", "net"] }
