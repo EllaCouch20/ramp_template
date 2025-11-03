@@ -8,4 +8,4 @@ use examples::{
 };
 
 // change the struct here to start a different example.
-start!(MotorcycleApp);
+start!(PlantGrowerApp);

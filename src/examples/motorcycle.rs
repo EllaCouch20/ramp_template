@@ -290,7 +290,7 @@ impl OnEvent for BikeName {
     fn on_event(&mut self, _ctx: &mut Context, event: Box<dyn Event>) -> Vec<Box<dyn Event>> { 
         if event.as_any().downcast_ref::<TickEvent>().is_some() { 
             let is_disabled = self.1.content().find::<TextInput>().unwrap().value().is_empty();
-            self.1.bumper().as_mut().unwrap().find::<PrimaryButton>().unwrap().1.1.2 = is_disabled;
+            self.1.bumper().as_mut().unwrap().find::<PrimaryButton>().unwrap().1.disable(is_disabled);
         }
 
         vec![event]
