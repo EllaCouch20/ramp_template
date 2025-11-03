@@ -1,11 +1,12 @@
 use roost::drawable::{Drawable, Color, Align};
 use roost::{include_dir, drawables, Component, Context, Application, Plugin};
-use roost::events::OnEvent;
+use roost::events::{OnEvent, Event, TickEvent};
 use roost::layouts::{Offset, Stack};
 
 use pelican::components::interface::navigation::PelicanError;
 use pelican::components::avatar::{AvatarContent, AvatarIconStyle};
-use pelican::components::{Toggle, TextSize, ExpandableText, Icon, TextStyle};
+use pelican::components::button::PrimaryButton;
+use pelican::components::{TextInput, TextSize, ExpandableText, Icon, TextStyle};
 use pelican::components::interface::general::{Bumper, Content, Header, Interface, Page};
 use pelican::plugin::PelicanUI;
 use pelican::theme::Theme;
@@ -29,7 +30,7 @@ impl Application for PlantGrowerApp {
 
     fn plugins(ctx: &mut Context) -> Vec<Box<dyn Plugin>> {
         ctx.assets.include_assets(include_dir!("./resources"));
-        let theme = Theme::light(&mut ctx.assets, Color::from_hex("#00bf69ff", 255));
+        let theme = Theme::dark(&mut ctx.assets, Color::from_hex("#00bf69ff", 255));
         vec![Box::new(PelicanUI::new(ctx, theme))]
     }
 }
@@ -45,7 +46,7 @@ pub struct Plant {
 impl Default for Plant {
     fn default() -> Self {
         Plant {
-            name: "Sparklepuff".to_string(),
+            name: "My Plant".to_string(),
             variation: "Flower".to_string(),
             sunlight: 0.0,
             water: 0.0,
@@ -82,8 +83,15 @@ impl Home {
         let plants = ctx.state().get::<AllPlants>().unwrap().plants.clone();
 
         let items = plants.into_iter().map(|plant| {
-            let icon = plant.variation.to_string().to_lowercase();
-            ListItem::new(ctx, Some(AvatarContent::Icon(icon, AvatarIconStyle::Brand)), ListItemInfoLeft::new(&plant.name, &plant.variation, None, None), None, None, None, |_| {})
+            let icon = match plant.variation.as_str() {
+                "Flower" => "flower",
+                "Christmas Tree" => "christmas_tree",
+                "Tomato" => "tomato",
+                "Potato" => "potato",
+                _ => "flower",
+            };
+
+            ListItem::new(ctx, Some(AvatarContent::Icon(icon.to_string(), AvatarIconStyle::Brand)), ListItemInfoLeft::new(&plant.name, &plant.variation, None, None), None, None, None, |_| {println!("List Item Pressed")})
         }).collect::<Vec<ListItem>>();
 
         let (offset, content) = match items.is_empty() {
@@ -109,7 +117,7 @@ impl AppPage for NewPlant {
         -> Result<Box<dyn AppPage>, PelicanError> {
         match index {
             0 => page!(Home::new(ctx), self),
-            1 => page!(PlantSummary::new(ctx), self),
+            1 => page!(PlantName::new(ctx), self),
             // 1 => page!(Toppings::new(ctx), self),
             _ => Err(PelicanError::InvalidPage(Some(self)))
         }
@@ -128,7 +136,7 @@ impl NewPlant {
 
         let selector = RadioSelector::new(ctx, default, vec![
             ("Flower", "The Sparklepuff™ blooms in rainbow shades every morning", Box::new(|ctx: &mut Context| if let Some(i) = ctx.state().get_mut::<Plant>() { i.variation = "Flower".to_string() })),
-            ("Christmas Tree", "The Whistlestem™ grows so tall it might whistle in the wind", Box::new(|ctx: &mut Context| if let Some(i) = ctx.state().get_mut::<Plant>() { i.variation = "Tree".to_string() })),
+            ("Christmas Tree", "The Whistlestem™ grows so tall it might whistle in the wind", Box::new(|ctx: &mut Context| if let Some(i) = ctx.state().get_mut::<Plant>() { i.variation = "Christmas Tree".to_string() })),
             ("Tomato", "The Goldberry™ is known for its perfectly spherical, bouncy fruit", Box::new(|ctx: &mut Context| if let Some(i) = ctx.state().get_mut::<Plant>() { i.variation = "Tomato".to_string() })),
             ("Potato", "The SnuggleSpud™ loves naps in warm, sunny soil", Box::new(|ctx: &mut Context| if let Some(i) = ctx.state().get_mut::<Plant>() { i.variation = "Potato".to_string() })),
         ]);
@@ -138,6 +146,52 @@ impl NewPlant {
         let header = Header::stack(ctx, "Choose seed");
 
         Ok(Self(Stack::default(), Page::new(header, content, Some(bumper))))
+    }
+}
+
+#[derive(Debug, Component)]
+pub struct PlantName(Stack, Page);
+
+impl AppPage for PlantName {
+    fn has_navigator(&self) -> bool {true}
+    fn navigate(mut self: Box<Self>, ctx: &mut Context, index: usize) 
+        -> Result<Box<dyn AppPage>, PelicanError> {
+        let input = self.1.content().find::<TextInput>().as_mut().unwrap().value();
+        ctx.state().get_mut::<Plant>().as_mut().unwrap().name = input.to_string();
+        match index {
+            0 => page!(NewPlant::new(ctx), self),
+            1 => page!(PlantSummary::new(ctx), self),
+            // 1 => page!(Toppings::new(ctx), self),
+            _ => Err(PelicanError::InvalidPage(Some(self)))
+        }
+    }
+}
+
+impl PlantName {
+    pub fn new(ctx: &mut Context) -> Result<Self, String> {
+        // ctx.state().get_mut::<Plant>().map(|i| i.name = i.variation.to_string());
+        
+        let plant = ctx.state().get::<Plant>().unwrap().clone();
+        let default = plant.name;
+
+        let input = TextInput::new(ctx, Some(&default), Some("Plant name"), Some("Enter plant name..."), None, None);
+
+        let bumper = Bumper::stack(ctx, false);
+        let content = Content::new(ctx, Offset::Start, drawables![input]);
+        let header = Header::stack(ctx, "Name plant");
+
+        Ok(Self(Stack::default(), Page::new(header, content, Some(bumper))))
+    }
+}
+
+impl OnEvent for PlantName {
+    fn on_event(&mut self, _ctx: &mut Context, event: Box<dyn Event>) -> Vec<Box<dyn Event>> { 
+        if event.as_any().downcast_ref::<TickEvent>().is_some() { 
+            let is_disabled = self.1.content().find::<TextInput>().unwrap().value().is_empty();
+            self.1.bumper().as_mut().unwrap().find::<PrimaryButton>().unwrap().1.1.2 = is_disabled;
+        }
+
+        vec![event]
     }
 }
 
@@ -162,8 +216,15 @@ impl PlantSummary {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
         let plant = ctx.state().get::<Plant>().unwrap().clone();
 
-        let icon = plant.variation.to_lowercase();
-        let planted = Icon::new(ctx, &icon, None, 96.0);
+        let icon = match plant.variation.as_str() {
+            "Flower" => "flower",
+            "Christmas Tree" => "christmas_tree",
+            "Tomato" => "tomato",
+            "Potato" => "potato",
+            _ => "flower",
+        };
+
+        let planted = Icon::new(ctx, icon, None, 96.0);
         let dirt = Icon::new(ctx, "dirt", None, 128.0);
 
         let content = Content::new(ctx, Offset::Center, drawables![planted, dirt]);
@@ -171,48 +232,8 @@ impl PlantSummary {
         let bumper = Bumper::stack_end(ctx);
         let header = Header::stack_end(ctx, &format!("{} planted", plant.variation));
 
+        if let Some(i) = ctx.state().get_mut::<AllPlants>() { i.plants.push(plant) }
+
         Ok(Self(Stack::default(), Page::new(header, content, Some(bumper))))
     }
 }
-
-// #[derive(Debug, Component)]
-// pub struct PlantCare(Stack, Page);
-
-// impl OnEvent for PlantCare {}
-// impl AppPage for PlantCare {
-//     fn has_navigator(&self) -> bool { true }
-
-//     fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-//         -> Result<Box<dyn AppPage>, PelicanError> {
-//         match index {
-//             0 => page!(NewPlant::new(ctx), self),
-//             1 => page!(PlantSummary::new(ctx), self),
-//             _ => Err(PelicanError::InvalidPage(Some(self))),
-//         }
-//     }
-// }
-
-// impl PlantCare {
-//     pub fn new(ctx: &mut Context) -> Result<Self, String> {
-//         let plant = ctx.state().get_mut::<Plant>().unwrap();
-
-//         let sunlight_slider = Slider::new(ctx, 0.0..=100.0, plant.sunlight, |ctx, val| {
-//             if let Some(p) = ctx.state().get_mut::<Plant>() { p.sunlight = val; }
-//         });
-//         let water_slider = Slider::new(ctx, 0.0..=100.0, plant.water, |ctx, val| {
-//             if let Some(p) = ctx.state().get_mut::<Plant>() { p.water = val; }
-//         });
-
-//         let content = Content::new(ctx, Offset::Start, drawables![
-//             Text::new(ctx, "Adjust sunlight", TextSize::Md, TextStyle::Primary),
-//             sunlight_slider,
-//             Text::new(ctx, "Adjust water", TextSize::Md, TextStyle::Primary),
-//             water_slider
-//         ]);
-
-//         let bumper = Bumper::stack(ctx, false);
-//         let header = Header::stack(ctx, "Plant Care");
-
-//         Ok(Self(Stack::default(), Page::new(header, content, Some(bumper))))
-//     }
-// }

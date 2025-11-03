@@ -108,7 +108,7 @@ impl Order {
 
             let container = if o.is_cup { "cup" } else { "cone" };
             let subtitle = format!("{container}, {toppings_text}");
-            ListItem::new(ctx, Some(AvatarContent::Icon(container, AvatarIconStyle::Brand)), ListItemInfoLeft::new(&o.flavor, &subtitle, None, None), None, None, None, |_| {})
+            ListItem::new(ctx, Some(AvatarContent::Icon(container.to_string(), AvatarIconStyle::Brand)), ListItemInfoLeft::new(&o.flavor, &subtitle, None, None), None, None, None, |_| {})
         }).collect::<Vec<ListItem>>();
 
         let (offset, content) = match items.is_empty() {
@@ -273,7 +273,7 @@ impl Success {
         let text = ExpandableText::new(ctx, &format!("{} Ice Ordered", my_order.flavor), TextSize::H4, TextStyle::Heading, Align::Center, None);   
         
         let icon = if my_order.is_cup {"cup"} else {"cone"};
-        let icon = Icon::new(ctx, icon, colors.text.primary, 128.0);
+        let icon = Icon::new(ctx, icon, Some(colors.text.primary), 128.0);
 
         let bumper = Bumper::stack_end(ctx);
         let content = Content::new(ctx, Offset::Center, drawables![icon, text]);

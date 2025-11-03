@@ -382,7 +382,7 @@
 					"-lmain",
 					"-lc++abi",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.ramp.orange;
+				PRODUCT_BUNDLE_IDENTIFIER = org.ramp.template;
 				PRODUCT_NAME = orange;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -515,7 +515,7 @@
 					"-lmain",
 					"-lc++abi",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.ramp.orange;
+				PRODUCT_BUNDLE_IDENTIFIER = org.ramp.template;
 				PRODUCT_NAME = orange;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
