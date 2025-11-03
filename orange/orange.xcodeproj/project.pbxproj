@@ -19,7 +19,7 @@
 		8826FE5D2DA5AB0F00588BC3 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8826FE5C2DA5AB0F00588BC3 /* CoreMedia.framework */; };
 		8826FE5F2DA5AB1700588BC3 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8826FE5E2DA5AB1700588BC3 /* CoreVideo.framework */; };
 		8826FE612DA5CE3700588BC3 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8826FE602DA5CE3600588BC3 /* CoreGraphics.framework */; };
-		8826FE692DA5D5D900588BC3 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8826FE682DA5D5D900588BC3 /* UIKit.framework */; platformFilter = ios; };
+		8826FE692DA5D5D900588BC3 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8826FE682DA5D5D900588BC3 /* UIKit.framework */; };
 		8826FE6B2DA5D74C00588BC3 /* libmain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8826FE6A2DA5D74C00588BC3 /* libmain.a */; };
 		8826FE6D2DA5DD6000588BC3 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8826FE6C2DA5DD6000588BC3 /* Carbon.framework */; platformFilters = (macos, ); };
 		8826FE6F2DA5DD8B00588BC3 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8826FE6E2DA5DD8B00588BC3 /* AppKit.framework */; platformFilters = (macos, ); };
