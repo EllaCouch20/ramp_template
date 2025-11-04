@@ -3,7 +3,6 @@ use roost::{include_dir, drawables, Component, Context, Application, Plugin};
 use roost::events::OnEvent;
 use roost::layouts::{Offset, Stack};
 
-use pelican::components::interface::navigation::PelicanError;
 use pelican::components::avatar::{AvatarContent, AvatarIconStyle};
 use pelican::components::{Toggle, TextSize, ExpandableText, Icon, TextStyle};
 use pelican::components::interface::general::{Bumper, Content, Header, Interface, Page};
@@ -12,7 +11,6 @@ use pelican::theme::Theme;
 use pelican::components::RadioSelector;
 use pelican::components::interface::navigation::{AppPage, RootInfo};
 use pelican::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
-use pelican::page;
 
 use serde::{Serialize, Deserialize};
 
@@ -21,7 +19,7 @@ pub struct IceCreamApp;
 impl Application for IceCreamApp {
     async fn new(ctx: &mut Context) -> impl Drawable {
         ctx.state().set(AllOrders::default());
-        let home = RootInfo::icon("home", "Ice Cream", |ctx: &mut Context| Box::new(Order::new(ctx).ok().unwrap()) as Box<dyn AppPage>);
+        let home = RootInfo::icon("home", "Ice Cream", Order::new(ctx).ok().unwrap());
 
         Interface::new(ctx, (vec![home], None))
     }
@@ -71,16 +69,7 @@ pub struct AllOrders {
 pub struct Order(Stack, Page);
 
 impl OnEvent for Order {}
-impl AppPage for Order {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            1 => page!(CupOrCone::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for Order {}
 
 impl Order {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -116,7 +105,8 @@ impl Order {
             false => (Offset::Start, drawables![ListItemGroup::new(items)])
         };
 
-        let bumper = Bumper::home(ctx, "Order Now", None);
+        let next = CupOrCone::new(ctx).unwrap();
+        let bumper = Bumper::home(ctx, ("Order Now", next), None);
         let content = Content::new(ctx, offset, content);
         let header = Header::home(ctx, "Ice Cream", None);
 
@@ -128,18 +118,7 @@ impl Order {
 pub struct CupOrCone(Stack, Page);
 
 impl OnEvent for CupOrCone {}
-impl AppPage for CupOrCone {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 => page!(Order::new(ctx), self),
-            1 => page!(Flavor::new(ctx), self),
-            // 1 => page!(Toppings::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for CupOrCone {}
 
 impl CupOrCone {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -151,7 +130,8 @@ impl CupOrCone {
             ("Cone", "Classic ice cream cone", Box::new(|ctx: &mut Context| if let Some(i) = ctx.state().get_mut::<IceCreamOrder>() { i.is_cup = false })),
         ]);
 
-        let bumper = Bumper::stack(ctx, false);
+        let next = Flavor::new(ctx).unwrap();
+        let bumper = Bumper::stack(ctx, false, next);
         let content = Content::new(ctx, Offset::Start, drawables![selector]);
         let header = Header::stack(ctx, "Cup or cone");
 
@@ -163,17 +143,7 @@ impl CupOrCone {
 pub struct Flavor(Stack, Page);
 
 impl OnEvent for Flavor {}
-impl AppPage for Flavor {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 => page!(CupOrCone::new(ctx), self),
-            1 => page!(Toppings::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for Flavor {}
 
 impl Flavor {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -196,7 +166,8 @@ impl Flavor {
             ("Pistachio", "Nutty, sweet, and slightly exotic", Box::new(|ctx: &mut Context| if let Some(i) = ctx.state().get_mut::<IceCreamOrder>() { i.flavor = "Pistachio".to_string() }))
         ]);
 
-        let bumper = Bumper::stack(ctx, false);
+        let next = Toppings::new(ctx).unwrap();
+        let bumper = Bumper::stack(ctx, false, next);
         let content = Content::new(ctx, Offset::Start, drawables![selector]);
         let header = Header::stack(ctx, "Choose flavor");
 
@@ -208,17 +179,7 @@ impl Flavor {
 pub struct Toppings(Stack, Page);
 
 impl OnEvent for Toppings {}
-impl AppPage for Toppings {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 => page!(Flavor::new(ctx), self),
-            1 => page!(Success::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for Toppings {}
 
 impl Toppings {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {        
@@ -243,7 +204,8 @@ impl Toppings {
         let default = ctx.state().get_mut::<IceCreamOrder>().map(|i| i.cookie_bits).unwrap_or(false);
         let cookies = Toggle::new(ctx, "Cookie crumble", default, |ctx: &mut Context, y: bool| if let Some(i) = ctx.state().get_mut::<IceCreamOrder>() { i.cookie_bits = y; });
 
-        let bumper = Bumper::stack(ctx, false);
+        let next = Success::new(ctx).unwrap();
+        let bumper = Bumper::stack(ctx, false, next);
         let content = Content::new(ctx, Offset::Start, drawables![sprinkles, cream, cherry, nuts, syrup, mallows, cookies]);
         let header = Header::stack(ctx, "Select toppings");
 
@@ -255,19 +217,10 @@ impl Toppings {
 pub struct Success(Stack, Page);
 
 impl OnEvent for Success {}
-impl AppPage for Success {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 | 1 => page!(Order::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for Success {}
 
 impl Success {
-    pub fn new(ctx: &mut Context) -> Result<Self, String> {  
+    pub fn new(ctx: &mut Context) -> Result<Self, String> {
         let my_order = ctx.state().get::<IceCreamOrder>().unwrap().clone();
         let colors = ctx.get::<PelicanUI>().get().0.theme().colors;
         let text = ExpandableText::new(ctx, &format!("{} Ice Ordered", my_order.flavor), TextSize::H4, TextStyle::Heading, Align::Center, None);   
@@ -275,9 +228,9 @@ impl Success {
         let icon = if my_order.is_cup {"cup"} else {"cone"};
         let icon = Icon::new(ctx, icon, Some(colors.text.primary), 128.0);
 
-        let bumper = Bumper::stack_end(ctx);
+        let bumper = Bumper::stack_end(ctx, 3);
         let content = Content::new(ctx, Offset::Center, drawables![icon, text]);
-        let header = Header::stack_end(ctx, "Order completed");
+        let header = Header::stack_end(ctx, "Order completed", 3);
 
         if let Some(i) = ctx.state().get_mut::<AllOrders>() { i.orders.push(my_order) }
 

@@ -2969,8 +2969,6 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 [[package]]
 name = "pelican_ui"
 version = "2.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7dde1240309cd6d9929ded66b648fecdfbecd4a4f92b60fb1c1487365c5309b"
 dependencies = [
  "base64",
  "chrono",
@@ -3518,8 +3516,6 @@ checksum = "57397d16646700483b67d2dd6511d79318f9d057fdbd21a4066aeac8b41d310a"
 [[package]]
 name = "roost_ui"
 version = "2.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e096c899ebee3f7dc1fd435a3d84c2417266fb6364e55eb31a8f74f0f2e0c90d"
 dependencies = [
  "downcast-rs 2.0.1",
  "image 0.25.6",
