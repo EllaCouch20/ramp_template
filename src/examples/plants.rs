@@ -1,19 +1,18 @@
-use roost::drawable::{Drawable, Color, Align};
-use roost::{include_dir, drawables, Component, Context, Application, Plugin};
-use roost::events::{OnEvent, Event, TickEvent};
-use roost::layouts::{Offset, Stack};
-
-use pelican::components::interface::navigation::PelicanError;
-use pelican::components::avatar::{AvatarContent, AvatarIconStyle};
-use pelican::components::button::PrimaryButton;
-use pelican::components::{TextInput, TextSize, ExpandableText, Icon, TextStyle};
-use pelican::components::interface::general::{Bumper, Content, Header, Interface, Page};
-use pelican::plugin::PelicanUI;
-use pelican::theme::Theme;
-use pelican::components::RadioSelector;
-use pelican::components::interface::navigation::{AppPage, RootInfo};
-use pelican::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
-use pelican::page;
+use pelican_ui::drawable::{Drawable, Color, Align};
+use pelican_ui::{include_dir, drawables, Component, Context, Application, Plugin};
+use pelican_ui::events::{OnEvent, Event, TickEvent};
+use pelican_ui::layouts::{Offset, Stack};
+use pelican_ui::components::interface::navigation::PelicanError;
+use pelican_ui::components::avatar::{AvatarContent, AvatarIconStyle};
+use pelican_ui::components::button::PrimaryButton;
+use pelican_ui::components::{TextInput, TextSize, ExpandableText, Icon, TextStyle};
+use pelican_ui::components::interface::general::{Bumper, Content, Header, Interface, Page};
+use pelican_ui::plugin::PelicanUI;
+use pelican_ui::theme::Theme;
+use pelican_ui::components::RadioSelector;
+use pelican_ui::components::interface::navigation::{AppPage, RootInfo};
+use pelican_ui::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
+use pelican_ui::page;
 
 use serde::{Serialize, Deserialize};
 

@@ -2968,9 +2968,9 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "pelican_ui"
-version = "2.0.4"
+version = "2.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7dde1240309cd6d9929ded66b648fecdfbecd4a4f92b60fb1c1487365c5309b"
+checksum = "92a2138aad910bec2a055896a66fdaddb7c1f4e66b8bd73e7f215e0c0fbb1f0b"
 dependencies = [
  "base64",
  "chrono",
@@ -2979,7 +2979,6 @@ dependencies = [
  "fast_image_resize",
  "image 0.25.6",
  "imageproc",
- "include_dir",
  "png 0.18.0",
  "qrc",
  "qrcode 0.14.1",
@@ -2991,9 +2990,9 @@ dependencies = [
 
 [[package]]
 name = "pelican_ui_proc"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d908c9fefc31e4d85cc95b2cc8d8b2164442b7fabeb4ee34023150e7a60b7366"
+checksum = "71a6c853b7ef6c8b5dd8279db0833eab92cf29747437eb9ec747adc57a82bbdb"
 dependencies = [
  "proc-macro2 1.0.95",
  "quote 1.0.40",
@@ -3281,9 +3280,7 @@ checksum = "74765f6d916ee2faa39bc8e68e4f3ed8949b48cccdac59983d287a7cb71ce9c5"
 name = "ramp_template"
 version = "0.1.0"
 dependencies = [
- "include_dir",
  "pelican_ui",
- "roost_ui",
  "serde",
  "tokio",
 ]
@@ -3517,9 +3514,9 @@ checksum = "57397d16646700483b67d2dd6511d79318f9d057fdbd21a4066aeac8b41d310a"
 
 [[package]]
 name = "roost_ui"
-version = "2.0.4"
+version = "2.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e096c899ebee3f7dc1fd435a3d84c2417266fb6364e55eb31a8f74f0f2e0c90d"
+checksum = "ac16992a2ff3b19af37420654c233089e05029e6edff5d3e35df38816e9f6ae0"
 dependencies = [
  "downcast-rs 2.0.1",
  "image 0.25.6",
