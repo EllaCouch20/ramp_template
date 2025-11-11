@@ -2,7 +2,6 @@ use pelican_ui::drawable::{Drawable, Color, Align};
 use pelican_ui::{include_dir, drawables, Component, Context, Application, Plugin};
 use pelican_ui::events::{OnEvent, Event, TickEvent};
 use pelican_ui::layouts::{Offset, Stack};
-use pelican_ui::components::interface::navigation::PelicanError;
 use pelican_ui::components::avatar::{AvatarContent, AvatarIconStyle};
 use pelican_ui::components::button::PrimaryButton;
 use pelican_ui::components::{TextInput, TextSize, ExpandableText, Icon, TextStyle};
@@ -12,7 +11,6 @@ use pelican_ui::theme::Theme;
 use pelican_ui::components::RadioSelector;
 use pelican_ui::components::interface::navigation::{AppPage, RootInfo};
 use pelican_ui::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
-use pelican_ui::page;
 
 use serde::{Serialize, Deserialize};
 
@@ -22,7 +20,7 @@ impl Application for PlantGrowerApp {
     async fn new(ctx: &mut Context) -> impl Drawable {
         ctx.state().set(AllPlants::default());
 
-        let home = RootInfo::icon("home", "My Plants", |ctx: &mut Context| Box::new(Home::new(ctx).ok().unwrap()) as Box<dyn AppPage>);
+        let home = RootInfo::icon("home", "My Plants", |ctx: &mut Context| Box::new(Home::new(ctx).unwrap()));
 
         Interface::new(ctx, (vec![home], None))
     }
@@ -62,16 +60,7 @@ pub struct AllPlants {
 pub struct Home(Stack, Page);
 
 impl OnEvent for Home {}
-impl AppPage for Home {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            1 => page!(NewPlant::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for Home {}
 
 impl Home {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -98,7 +87,7 @@ impl Home {
             false => (Offset::Start, drawables![ListItemGroup::new(items)])
         };
 
-        let bumper = Bumper::home(ctx, "Plant New Seed", None);
+        let bumper = Bumper::home(ctx, ("Plant New Seed", Box::new(|ctx: &mut Context| Box::new(NewPlant::new(ctx).unwrap()))), None);
         let content = Content::new(ctx, offset, content);
         let header = Header::home(ctx, "My Plants", None);
 
@@ -110,18 +99,7 @@ impl Home {
 pub struct NewPlant(Stack, Page);
 
 impl OnEvent for NewPlant {}
-impl AppPage for NewPlant {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 => page!(Home::new(ctx), self),
-            1 => page!(PlantName::new(ctx), self),
-            // 1 => page!(Toppings::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for NewPlant {}
 
 impl NewPlant {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -140,7 +118,7 @@ impl NewPlant {
             ("Potato", "The SnuggleSpud™ loves naps in warm, sunny soil", Box::new(|ctx: &mut Context| if let Some(i) = ctx.state().get_mut::<Plant>() { i.variation = "Potato".to_string() })),
         ]);
 
-        let bumper = Bumper::stack(ctx, false);
+        let bumper = Bumper::stack(ctx, false, |ctx: &mut Context| Box::new(PlantName::new(ctx).unwrap()));
         let content = Content::new(ctx, Offset::Start, drawables![selector]);
         let header = Header::stack(ctx, "Choose seed");
 
@@ -150,21 +128,7 @@ impl NewPlant {
 
 #[derive(Debug, Component)]
 pub struct PlantName(Stack, Page);
-
-impl AppPage for PlantName {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(mut self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        let input = self.1.content().find::<TextInput>().as_mut().unwrap().value();
-        ctx.state().get_mut::<Plant>().as_mut().unwrap().name = input.to_string();
-        match index {
-            0 => page!(NewPlant::new(ctx), self),
-            1 => page!(PlantSummary::new(ctx), self),
-            // 1 => page!(Toppings::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for PlantName {}
 
 impl PlantName {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -175,7 +139,7 @@ impl PlantName {
 
         let input = TextInput::new(ctx, Some(&default), Some("Plant name"), Some("Enter plant name..."), None, None);
 
-        let bumper = Bumper::stack(ctx, false);
+        let bumper = Bumper::stack(ctx, false, |ctx: &mut Context| Box::new(PlantSummary::new(ctx).unwrap()));
         let content = Content::new(ctx, Offset::Start, drawables![input]);
         let header = Header::stack(ctx, "Name plant");
 
@@ -198,18 +162,7 @@ impl OnEvent for PlantName {
 pub struct PlantSummary(Stack, Page);
 
 impl OnEvent for PlantSummary {}
-impl AppPage for PlantSummary {
-    fn has_navigator(&self) -> bool { true }
-
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 => page!(Home::new(ctx), self),
-            1 => page!(Home::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self))),
-        }
-    }
-}
+impl AppPage for PlantSummary {}
 
 impl PlantSummary {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -228,8 +181,8 @@ impl PlantSummary {
 
         let content = Content::new(ctx, Offset::Center, drawables![planted, dirt]);
 
-        let bumper = Bumper::stack_end(ctx);
-        let header = Header::stack_end(ctx, &format!("{} planted", plant.variation));
+        let bumper = Bumper::stack_end(ctx, 3);
+        let header = Header::stack_end(ctx, &format!("{} planted", plant.variation), 3);
 
         if let Some(i) = ctx.state().get_mut::<AllPlants>() { i.plants.push(plant) }
 

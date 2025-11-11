@@ -3,7 +3,6 @@ use pelican_ui::{include_dir, drawables, Component, Context, Application, Plugin
 use pelican_ui::events::{OnEvent, Event, TickEvent};
 use pelican_ui::layouts::{Offset, Stack};
 use pelican_ui::components::button::PrimaryButton;
-use pelican_ui::components::interface::navigation::PelicanError;
 use pelican_ui::components::avatar::{AvatarContent, AvatarIconStyle};
 use pelican_ui::components::{TextInput, Toggle, TextSize, ExpandableText, Icon, TextStyle};
 use pelican_ui::components::interface::general::{Bumper, Content, Header, Interface, Page};
@@ -12,26 +11,26 @@ use pelican_ui::theme::Theme;
 use pelican_ui::components::RadioSelector;
 use pelican_ui::components::interface::navigation::{AppPage, RootInfo};
 use pelican_ui::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
-use pelican_ui::page;
+use pelican_ui::components::interface::navigation::NavigationEvent;
 
 use serde::{Serialize, Deserialize};
 
 pub struct MotorcycleApp;
 
-impl Application for MotorcycleApp {
-    async fn new(ctx: &mut Context) -> impl Drawable {
-        ctx.state().set(AllBikes::default());
-        let home = RootInfo::icon("home", "Motorcycles", |ctx: &mut Context| Box::new(BuildBike::new(ctx).ok().unwrap()) as Box<dyn AppPage>);
+// impl Application for MotorcycleApp {
+//     async fn new(ctx: &mut Context) -> impl Drawable {
+//         ctx.state().set(AllBikes::default());
+//         let home = RootInfo::icon("home", "Motorcycles", BuildBike::new(ctx).unwrap());
 
-        Interface::new(ctx, (vec![home], None))
-    }
+//         Interface::new(ctx, (vec![home], None))
+//     }
 
-    fn plugins(ctx: &mut Context) -> Vec<Box<dyn Plugin>> {
-        ctx.assets.include_assets(include_dir!("./resources"));
-        let theme = Theme::dark(&mut ctx.assets, Color::from_hex("#ff1f23", 255));
-        vec![Box::new(PelicanUI::new(ctx, theme))]
-    }
-}
+//     fn plugins(ctx: &mut Context) -> Vec<Box<dyn Plugin>> {
+//         ctx.assets.include_assets(include_dir!("./resources"));
+//         let theme = Theme::dark(&mut ctx.assets, Color::from_hex("#ff1f23", 255));
+//         vec![Box::new(PelicanUI::new(ctx, theme))]
+//     }
+// }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Bike {
@@ -65,16 +64,7 @@ pub struct AllBikes {
 pub struct BuildBike(Stack, Page);
 
 impl OnEvent for BuildBike {}
-impl AppPage for BuildBike {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            1 => page!(FramePage::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for BuildBike {}
 
 impl BuildBike {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -105,7 +95,11 @@ impl BuildBike {
             false => (Offset::Start, drawables![ListItemGroup::new(items)])
         };
 
-        let bumper = Bumper::home(ctx, "Build Bike", None);
+        let bumper = Bumper::home(ctx, ("Build Bike", |ctx: &mut Context| {
+            let page = Box::new(FramePage::new(ctx).unwrap());
+            ctx.trigger_event(NavigationEvent::Push(Some(page)))
+        }), None);
+
         let content = Content::new(ctx, offset, content);
         let header = Header::home(ctx, "Motorcycles", None);
 
@@ -117,17 +111,7 @@ impl BuildBike {
 pub struct FramePage(Stack, Page);
 
 impl OnEvent for FramePage {}
-impl AppPage for FramePage {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 => page!(BuildBike::new(ctx), self),
-            1 => page!(EnginePage::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for FramePage {}
 
 impl FramePage {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -145,7 +129,11 @@ impl FramePage {
             ("Adventure", "Tall adventure frame with long travel suspension for touring", Box::new(|ctx| if let Some(b) = ctx.state().get_mut::<Bike>() { b.frame = "Adventure".to_string() })),
         ]);
 
-        let bumper = Bumper::stack(ctx, false);
+        let bumper = Bumper::stack(ctx, None, false, |ctx: &mut Context| {
+            let page = Box::new(EnginePage::new(ctx).unwrap());
+            ctx.trigger_event(NavigationEvent::Push(Some(page)))
+        });
+
         let content = Content::new(ctx, Offset::Start, drawables![selector]);
         let header = Header::stack(ctx, "Choose Frame");
 
@@ -158,17 +146,7 @@ impl FramePage {
 pub struct EnginePage(Stack, Page);
 
 impl OnEvent for EnginePage {}
-impl AppPage for EnginePage {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 => page!(FramePage::new(ctx), self),
-            1 => page!(AccessoriesPage::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for EnginePage {}
 
 impl EnginePage {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -211,7 +189,11 @@ impl EnginePage {
             }
         };
 
-        let bumper = Bumper::stack(ctx, false);
+        let bumper = Bumper::stack(ctx, None, false, |ctx: &mut Context| {
+            let page = Box::new(AccessoriesPage::new(ctx).unwrap());
+            ctx.trigger_event(NavigationEvent::Push(Some(page)))
+        });
+
         let content = Content::new(ctx, Offset::Start, drawables![selector]);
         let header = Header::stack(ctx, "Choose engine");
 
@@ -223,17 +205,7 @@ impl EnginePage {
 pub struct AccessoriesPage(Stack, Page);
 
 impl OnEvent for AccessoriesPage {}
-impl AppPage for AccessoriesPage {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 => page!(EnginePage::new(ctx), self),
-            1 => page!(BikeName::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for AccessoriesPage {}
 
 impl AccessoriesPage {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -242,7 +214,11 @@ impl AccessoriesPage {
         let heated_grips = Toggle::new(ctx, "Heated grips", bike.heated_grips, |ctx: &mut Context, val: bool| if let Some(b) = ctx.state().get_mut::<Bike>() { b.heated_grips = val });
         let saddlebags = Toggle::new(ctx, "Saddlebags", bike.saddlebags, |ctx: &mut Context, val: bool| if let Some(b) = ctx.state().get_mut::<Bike>() { b.saddlebags = val });
 
-        let bumper = Bumper::stack(ctx, false);
+        let bumper = Bumper::stack(ctx, None, false, |ctx: &mut Context| {
+            let page = Box::new(BikeName::new(ctx).unwrap());
+            ctx.trigger_event(NavigationEvent::Push(Some(page)))
+        });
+
         let content = Content::new(ctx, Offset::Start, drawables![heated_grips, saddlebags]);
         let header = Header::stack(ctx, "Add Accessories");
 
@@ -254,20 +230,7 @@ impl AccessoriesPage {
 #[derive(Debug, Component)]
 pub struct BikeName(Stack, Page);
 
-impl AppPage for BikeName {
-    fn has_navigator(&self) -> bool {true}
-    fn navigate(mut self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        let input = self.1.content().find::<TextInput>().as_mut().unwrap().value();
-        ctx.state().get_mut::<Bike>().as_mut().unwrap().nickname = input.to_string();
-        match index {
-            0 => page!(AccessoriesPage::new(ctx), self),
-            1 => page!(BikeSummary::new(ctx), self),
-            // 1 => page!(Toppings::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self)))
-        }
-    }
-}
+impl AppPage for BikeName {}
 
 impl BikeName {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -277,7 +240,11 @@ impl BikeName {
 
         let input = TextInput::new(ctx, Some(&default), Some("Bike nickname"), Some("Enter nickname..."), None, None);
 
-        let bumper = Bumper::stack(ctx, false);
+        let bumper = Bumper::stack(ctx, None, false, |ctx: &mut Context| {
+            let page = Box::new(BikeSummary::new(ctx).unwrap());
+            ctx.trigger_event(NavigationEvent::Push(Some(page)))
+        });
+
         let content = Content::new(ctx, Offset::Start, drawables![input]);
         let header = Header::stack(ctx, "Name bike");
 
@@ -300,17 +267,7 @@ impl OnEvent for BikeName {
 pub struct BikeSummary(Stack, Page);
 
 impl OnEvent for BikeSummary {}
-impl AppPage for BikeSummary {
-    fn has_navigator(&self) -> bool { true }
-
-    fn navigate(self: Box<Self>, ctx: &mut Context, index: usize) 
-        -> Result<Box<dyn AppPage>, PelicanError> {
-        match index {
-            0 | 1 => page!(BuildBike::new(ctx), self),
-            _ => Err(PelicanError::InvalidPage(Some(self))),
-        }
-    }
-}
+impl AppPage for BikeSummary {}
 
 impl BikeSummary {
     pub fn new(ctx: &mut Context) -> Result<Self, String> {
@@ -321,8 +278,11 @@ impl BikeSummary {
 
         let content = Content::new(ctx, Offset::Center, drawables![icon, text]);
 
-        let bumper = Bumper::stack_end(ctx);
-        let header = Header::stack_end(ctx, "Created bike");
+        let bumper = Bumper::stack_end(ctx, |ctx: &mut Context| {
+            for _ in 0..4 { ctx.trigger_event(NavigationEvent::Pop) }
+        });
+
+        let header = Header::stack_end(ctx, "Created bike", 4);
 
         if let Some(i) = ctx.state().get_mut::<AllBikes>() { i.bikes.push(bike) }
 
