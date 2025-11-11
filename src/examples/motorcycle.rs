@@ -279,7 +279,7 @@ impl BikeSummary {
         let content = Content::new(ctx, Offset::Center, drawables![icon, text]);
 
         let bumper = Bumper::stack_end(ctx, |ctx: &mut Context| {
-            for _ in 0..4 { ctx.trigger_event(NavigationEvent::Pop) }
+            ctx.trigger_event(NavigationEvent::Reset)
         });
 
         let header = Header::stack_end(ctx, "Created bike", 4);

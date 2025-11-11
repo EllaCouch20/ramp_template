@@ -253,7 +253,7 @@ impl Success {
         let icon = Icon::new(ctx, icon, Some(colors.text.primary), 128.0);
 
         let bumper = Bumper::stack_end(ctx, |ctx: &mut Context| {
-            for _ in 0..4 { ctx.trigger_event(NavigationEvent::Pop) }
+            ctx.trigger_event(NavigationEvent::Reset)
         });
 
         let content = Content::new(ctx, Offset::Center, drawables![icon, text]);
