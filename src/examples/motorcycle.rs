@@ -4,7 +4,8 @@ use pelican_ui::events::{OnEvent, Event, TickEvent};
 use pelican_ui::layouts::{Offset, Stack};
 use pelican_ui::components::button::PrimaryButton;
 use pelican_ui::components::avatar::{AvatarContent, AvatarIconStyle};
-use pelican_ui::components::{TextInput, Toggle, TextSize, ExpandableText, Icon, TextStyle};
+use pelican_ui::components::{Toggle, Icon, TextInput};
+use pelican_ui::components::text::{TextSize, ExpandableText, TextStyle};
 use pelican_ui::components::interface::general::{Bumper, Content, Header, Interface, Page};
 use pelican_ui::plugin::PelicanUI;
 use pelican_ui::theme::Theme;
@@ -238,7 +239,7 @@ impl BikeName {
         let bike = ctx.state().get::<Bike>().unwrap().clone();
         let default = bike.nickname;
 
-        let input = TextInput::new(ctx, Some(&default), Some("Bike nickname"), Some("Enter nickname..."), None, None);
+        let input = TextInput::new(ctx, Some(&default), ("Bike nickname", true), Some("Enter nickname..."), None, None);
 
         let bumper = Bumper::stack(ctx, None, false, |ctx: &mut Context| {
             let page = Box::new(BikeSummary::new(ctx).unwrap());
@@ -278,11 +279,9 @@ impl BikeSummary {
 
         let content = Content::new(ctx, Offset::Center, drawables![icon, text]);
 
-        let bumper = Bumper::stack_end(ctx, |ctx: &mut Context| {
-            ctx.trigger_event(NavigationEvent::Reset)
-        });
+        let bumper = Bumper::stack_end(ctx);
 
-        let header = Header::stack_end(ctx, "Created bike", 4);
+        let header = Header::stack_end(ctx, "Created bike");
 
         if let Some(i) = ctx.state().get_mut::<AllBikes>() { i.bikes.push(bike) }
 

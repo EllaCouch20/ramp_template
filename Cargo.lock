@@ -1416,6 +1416,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hatchling_ui"
+version = "0.0.1"
+dependencies = [
+ "chrono",
+ "pelican_ui",
+ "serde",
+]
+
+[[package]]
 name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2010,8 +2019,6 @@ dependencies = [
 [[package]]
 name = "maverick_os"
 version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a23cff870e6ff030c4f90507cded116e92b9ab6e6d5753a0c75c011c939584bf"
 dependencies = [
  "active_rusqlite",
  "air",
@@ -3043,8 +3050,6 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 [[package]]
 name = "pelican_ui"
 version = "2.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a9c46da1409e3f715dd124de8d6a8f0491e8cdba2fb0e1100a880883fa70926"
 dependencies = [
  "base64",
  "chrono",
@@ -3362,6 +3367,7 @@ checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
 name = "ramp_template"
 version = "0.1.0"
 dependencies = [
+ "hatchling_ui",
  "pelican_ui",
  "serde",
  "tokio",
@@ -3617,8 +3623,6 @@ checksum = "0c6a884d2998352bb4daf0183589aec883f16a6da1f4dde84d8e2e9a5409a1ce"
 [[package]]
 name = "roost_ui"
 version = "2.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab8a9cdf8ada02ac894279eb24988ca2b9961ba26f282abaf5379c9a4c653793"
 dependencies = [
  "downcast-rs 2.0.2",
  "image 0.25.8",

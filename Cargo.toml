@@ -8,7 +8,8 @@ repository = "https://github.com/EllaCouch20/ramp_template.git"
 authors = ["Ella Couch <ella@orange.me>"]
 
 [dependencies]
-pelican_ui = "2.0.6"
+pelican_ui = {path="../pelican"}
+hatchling_ui = {path="../chk"}
 serde = "1.0.228"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
